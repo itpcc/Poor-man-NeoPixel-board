@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include "ESPAsyncUDP.h"
 
-const char * ssid = "ericja";
-const char * password = "jdifkrko196f";
+const char * ssid = "<YOUR WIFISSID>";
+const char * password = "<YOUR WIFI PASSWORD>";
 
 AsyncUDP udp;
 

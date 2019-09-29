@@ -2,8 +2,8 @@
 #include <ESPAsyncUDP.h>
 #include <FastLED.h>
 
-const char * ssid = "ericja";
-const char * password = "jdifkrko196f";
+const char * ssid = "<YOUR WIFISSID>";
+const char * password = "<YOUR WIFI PASSWORD>";
 
 // How many leds in your strip?
 #define NUM_LEDS 96 // 12*8
@@ -60,12 +60,20 @@ JINX_TPM2_T tpm2_parse(uint8 *packet, size_t packetLength){
   return result;
 }
 
-
+/**
+ * Clear displaying LED to stop display.
+ */
 void led_clear(){
   leds = 0x000000;
   FastLED.show();
 }
 
+/**
+ * Display LED matrix based on TPM2 packet received.
+ * It'll check packet number and start from segment of data defined in `packet_no`.
+ * For example, if it's packet #3 and each packet is 16 bytes, it'll start display at pixel number 16*3 = 48.
+ * @param matrixPacket TPM2 struct that contain matrix's data.
+ */
 void led_display(JINX_TPM2_T &matrixPacket){
   for(
     size_t i = ((matrixPacket.packet_no - 1) * matrixPacket.data_size); 
@@ -93,15 +101,13 @@ void setup()
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       if(++i % NUM_LEDS == 0){ led_clear(); i = 0; }
-      leds[i] = 0x0F0F00; FastLED.show();
+      leds[i - 1] = 0x0F0F00; FastLED.show();
       Serial.print(".");
     }
     Serial.println("");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
     led_clear();
     
-    if(udp.listen(65506)) {
+    if(udp.listen(65506)) { // Default (and only?) port for TPM2.net
         Serial.print("UDP Listening on IP: ");
         Serial.println(WiFi.localIP());
         udp.onPacket([](AsyncUDPPacket packet) {
@@ -125,15 +131,8 @@ void setup()
             uint8_t *packetBuffer = packet.data();
             size_t packetLength = packet.length();
             JINX_TPM2_T matrixPacket = tpm2_parse(packetBuffer, packetLength);
-            Serial.printf("%01d\t%05d\t%03d/%03d\t%05d ->", matrixPacket.type, matrixPacket.size, matrixPacket.packet_no, matrixPacket.packet_cnt, matrixPacket.data_size);
-            
-            for(size_t i = 0; i < matrixPacket.data_size; ++i){
-              if(i % 3 == 0) Serial.print(' ');
-              Serial.printf("%02x", (uint8_t) matrixPacket.data[i]);
-            }
             if(matrixPacket.type == TPM2_DATA && matrixPacket.data_size > 0)
               led_display(matrixPacket);
-            Serial.print('\n');
         });
     }
 }
