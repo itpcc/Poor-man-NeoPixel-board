@@ -1,4 +1,4 @@
-# Poor man's NeoPixel neck oversized card
+# Poor man's NeoPixel shirt board
 
 I do this project to try using NeoPixel LED strip for "illuminate shirt". The idea is, put NeoPixels on the neck-hanging oversized card, connect to network and drive LEDs using ESP8266, and control with whatever program that support TPM2.net ([Jinx](https://www.ledstyles.de/index.php?thread/22271-jinx-led-matrix-control-und-die-n%C3%A4chste-matrix-software/) for example) just for fun.
 
